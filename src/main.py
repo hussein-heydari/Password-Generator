@@ -1,5 +1,6 @@
 import random
 import string
+import nltk
 
 class PasswordGenerator:
     def __init__(self, pass_len):
@@ -40,3 +41,13 @@ class RandomPasswordGenerator(PasswordGenerator):
         random.shuffle(final_pool)
         password = ''.join(final_pool)
         return password
+
+class PinNumberGenerator(PasswordGenerator):
+    def __init__(self, pass_len):
+        super().__init__(pass_len)
+
+    def generate(self):
+        pin_pool = string.digits
+        pin_rand = random.choices(pin_pool, k=self.pass_len)
+        pin = "".join(pin_rand)
+        return pin
