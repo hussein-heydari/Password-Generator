@@ -27,10 +27,7 @@ class RandomPasswordGenerator(PasswordGenerator):
         :type special_chars: bool, optional
         :raises ValueError: if password length is not between 10 and 20 characters
         """
-        if 10 <= pass_len <= 20:
-            super().__init__(pass_len)
-        else:
-            raise ValueError("Password length must be between 10 and 20 characters.")
+        super().__init__(pass_len)
         self.numbers = numbers
         self.special_chars = special_chars
 
@@ -60,8 +57,12 @@ class RandomPasswordGenerator(PasswordGenerator):
         :return: final password
         :rtype: str
         """
-        necessary_pool, char_num = self.get_necessary_part(self.pass_len)
-        main_pool = string.ascii_letters + string.digits + string.punctuation
+        necessary_pool, char_num = self.get_necessary_part()
+        main_pool = string.ascii_letters
+        if self.numbers:
+            main_pool += string.digits
+        if self.special_chars:
+            main_pool += string.punctuation
         rand_pool = ''.join(random.sample(main_pool, char_num))
         final_pool = list(necessary_pool + rand_pool)
         random.shuffle(final_pool)
@@ -72,10 +73,7 @@ class MemorablePasswordGenerator(PasswordGenerator):
     """Child class for generating memorable passwords using words from nltk corpus
     """
     def __init__(self, pass_len, separator='-', capitalize = False):
-        if 3 <= pass_len <= 8:
-            super().__init__(pass_len)
-        else:
-            raise ValueError("Password must be between 3 and 8 words long.")
+        super().__init__(pass_len)
         self.separator = separator
         self.capitalize = capitalize
 
@@ -112,10 +110,7 @@ class PinNumberGenerator(PasswordGenerator):
     """Child class for generating pin numbers
     """
     def __init__(self, pass_len):
-        if 8 <= pass_len <= 15:
-            super().__init__(pass_len)
-        else:
-            raise ValueError("Pin number must be between 8 and 15 numbers long.")
+        super().__init__(pass_len)
 
     def generate(self):
         """Generates a random pin number
@@ -127,4 +122,88 @@ class PinNumberGenerator(PasswordGenerator):
         pin_rand = random.choices(pin_pool, k=self.pass_len)
         pin = "".join(pin_rand)
         return pin
-    
+
+while True:
+    try:
+        pass_type = input("Please type in wich kind of password you need: 'Random', 'Memorable' or 'Pin'(r/m/p): ").lower()
+        if not pass_type in ["random", "memorable", "pin", "r", "m", "p"]:
+            raise ValueError("Invalid password type. Please choose 'Random', 'Memorable', or 'Pin'.")
+        break
+    except ValueError as ve:
+        print(ve)
+
+def test(inp_message, error_message, type):
+    user_input = input(inp_message)
+    if type == int and user_input.isdigit():
+        user_input = int(user_input)
+        return user_input
+    elif type == str and user_input in ["yes", "no", "y", "n"]:
+        if user_input in ["yes", "y"]:
+            return True
+        else:
+            return False
+    elif type == str and user_input in string.punctuation:
+            return user_input
+    else:
+        raise ValueError(f"Invalid input. {error_message}")
+
+if pass_type in ["random", "r"]:
+    while True:
+        try:
+            pass_length = test("How long should the password be? (10-20 characters): ", "Please type in a number between 10 and 20.", int)
+            if not 10 <= pass_length <= 20:
+                raise ValueError("Password length must be between 10 and 20 characters.")
+            break
+        except ValueError as ve:
+            print(ve)
+    while True:
+        try:
+            numbers = test("Should the password include numbers? (yes/no): ", "Please type in 'yes' or 'no'.", str)
+            break
+        except ValueError as ve:
+            print(ve)
+    while True:
+        try:
+            special_chars = test("Should the password include special characters? (yes/no): ", "Please type in 'yes' or 'no'.", str)
+            break
+        except ValueError as ve:
+            print(ve)
+    password = RandomPasswordGenerator(pass_length, numbers, special_chars)
+
+if pass_type in ["memorable", "m"]:
+    while True:
+        try:
+            pass_length = test("How many words long should the password be? (3-8 words): ", "Please type in a number between 3 and 8.", int)
+            if not 3 <= pass_length <= 8:
+                raise ValueError("Password length must be between 3 and 8 words.")
+            break
+        except ValueError as ve:
+            print(ve)
+    while True:
+        try:
+            separator = test(f"Please choose the separator for your password from these options: {string.punctuation} ", f"Please type in a separator ({string.punctuation}).", str)
+            break
+        except ValueError as ve:
+            print(ve)
+    while True:
+        try:
+            capitalized = test("Should the words in the password be capitalized? (yes/no): ", "Please type in 'yes' or 'no'.", str)
+            break
+        except ValueError as ve:
+            print(ve)
+    password = MemorablePasswordGenerator(pass_length, separator, capitalized)
+
+if pass_type in ["pin", "p"]:
+    while True:
+        try:
+            pass_length = test("How long should the password be? (3-8 characters): ", "Please type in a number between 3 and 8.", int)
+            if not 3 <= pass_length <= 8:
+                raise ValueError("Password length must be between 3 and 8.")
+            break
+        except ValueError as ve:
+            print(ve)
+    password = PinNumberGenerator(pass_length)
+
+if __name__ == "__main__":
+    password_generated = password.generate()
+    print(f"Generated password: {password_generated}")
