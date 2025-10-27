@@ -1,15 +1,17 @@
+from abc import ABC, abstractmethod
 import random
 import string
 import nltk
 from nltk.corpus import words
 
-class PasswordGenerator:
+class PasswordGenerator(ABC):
     """Mother class for password generators,
     saves the password length as an argument
     """
     def __init__(self, pass_len):
         self.pass_len = pass_len
-    
+
+    @abstractmethod
     def generate():
         pass
 
