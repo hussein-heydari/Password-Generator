@@ -4,6 +4,7 @@ import string
 import nltk
 from nltk.corpus import words
 
+
 class PasswordGenerator(ABC):
     """Mother class for password generators,
     saves the password length as an argument
@@ -14,6 +15,7 @@ class PasswordGenerator(ABC):
     @abstractmethod
     def generate():
         pass
+
 
 class RandomPasswordGenerator(PasswordGenerator):
     """Child class for generating passwords using random characters
@@ -68,8 +70,9 @@ class RandomPasswordGenerator(PasswordGenerator):
         rand_pool = ''.join(random.sample(main_pool, char_num))
         final_pool = list(necessary_pool + rand_pool)
         random.shuffle(final_pool)
-        password = ''.join(final_pool)
-        return password
+        rand_password = ''.join(final_pool)
+        return rand_password
+
 
 class MemorablePasswordGenerator(PasswordGenerator):
     """Child class for generating memorable passwords using words from nltk corpus
@@ -105,8 +108,9 @@ class MemorablePasswordGenerator(PasswordGenerator):
         if self.capitalize:
             initial_pool = [word.capitalize() for word in initial_pool]
         rand_words = random.choices(initial_pool, k=self.pass_len)
-        password = self.separator.join(rand_words)
-        return password
+        memorable_password = self.separator.join(rand_words)
+        return memorable_password
+
 
 class PinNumberGenerator(PasswordGenerator):
     """Child class for generating pin numbers
@@ -125,16 +129,18 @@ class PinNumberGenerator(PasswordGenerator):
         pin = "".join(pin_rand)
         return pin
 
-while True:
-    try:
-        pass_type = input("Please type in wich kind of password you need: 'Random', 'Memorable' or 'Pin'(r/m/p): ").lower()
-        if not pass_type in ["random", "memorable", "pin", "r", "m", "p"]:
-            raise ValueError("Invalid password type. Please choose 'Random', 'Memorable', or 'Pin'.")
-        break
-    except ValueError as ve:
-        print(ve)
 
-def test(inp_message, error_message, type):
+def determine_pass_type():
+    while True:
+        try:
+            pass_type = input("Please type in wich kind of password you need: 'Random', 'Memorable' or 'Pin'(r/m/p): ").lower()
+            if not pass_type in ["random", "memorable", "pin", "r", "m", "p"]:
+                raise ValueError(f"{pass_type} is not a valid password type. Please choose 'Random', 'Memorable', or 'Pin'.")
+            return pass_type
+        except ValueError as ve:
+            print(ve)
+
+def input_validation(inp_message, error_message, type):
     user_input = input(inp_message)
     if type == int and user_input.isdigit():
         user_input = int(user_input)
@@ -149,63 +155,67 @@ def test(inp_message, error_message, type):
     else:
         raise ValueError(f"Invalid input. {error_message}")
 
-if pass_type in ["random", "r"]:
-    while True:
-        try:
-            pass_length = test("How long should the password be? (10-20 characters): ", "Please type in a number between 10 and 20.", int)
-            if not 10 <= pass_length <= 20:
-                raise ValueError("Password length must be between 10 and 20 characters.")
-            break
-        except ValueError as ve:
-            print(ve)
-    while True:
-        try:
-            numbers = test("Should the password include numbers? (yes/no): ", "Please type in 'yes' or 'no'.", str)
-            break
-        except ValueError as ve:
-            print(ve)
-    while True:
-        try:
-            special_chars = test("Should the password include special characters? (yes/no): ", "Please type in 'yes' or 'no'.", str)
-            break
-        except ValueError as ve:
-            print(ve)
-    password = RandomPasswordGenerator(pass_length, numbers, special_chars)
+def handle_flow():
+    pass_type = determine_pass_type()
+    if pass_type in ["random", "r"]:
+        while True:
+            try:
+                pass_length = input_validation("How long should the password be? (10-20 characters): ", "Please type in a number between 10 and 20.", int)
+                if not 10 <= pass_length <= 20:
+                    raise ValueError("Password length must be between 10 and 20 characters.")
+                break
+            except ValueError as ve:
+                print(ve)
+        while True:
+            try:
+                numbers = input_validation("Should the password include numbers? (yes/no): ", "Please type in 'yes' or 'no'.", str)
+                break
+            except ValueError as ve:
+                print(ve)
+        while True:
+            try:
+                special_chars = input_validation("Should the password include special characters? (yes/no): ", "Please type in 'yes' or 'no'.", str)
+                break
+            except ValueError as ve:
+                print(ve)
+        password = RandomPasswordGenerator(pass_length, numbers, special_chars)
 
-if pass_type in ["memorable", "m"]:
-    while True:
-        try:
-            pass_length = test("How many words long should the password be? (3-8 words): ", "Please type in a number between 3 and 8.", int)
-            if not 3 <= pass_length <= 8:
-                raise ValueError("Password length must be between 3 and 8 words.")
-            break
-        except ValueError as ve:
-            print(ve)
-    while True:
-        try:
-            separator = test(f"Please choose the separator for your password from these options: {string.punctuation} ", f"Please type in a separator ({string.punctuation}).", str)
-            break
-        except ValueError as ve:
-            print(ve)
-    while True:
-        try:
-            capitalized = test("Should the words in the password be capitalized? (yes/no): ", "Please type in 'yes' or 'no'.", str)
-            break
-        except ValueError as ve:
-            print(ve)
-    password = MemorablePasswordGenerator(pass_length, separator, capitalized)
+    if pass_type in ["memorable", "m"]:
+        while True:
+            try:
+                pass_length = input_validation("How many words long should the password be? (3-8 words): ", "Please type in a number between 3 and 8.", int)
+                if not 3 <= pass_length <= 8:
+                    raise ValueError("Password length must be between 3 and 8 words.")
+                break
+            except ValueError as ve:
+                print(ve)
+        while True:
+            try:
+                separator = input_validation(f"Please choose the separator for your password from these options: {string.punctuation} ", f"Please type in a separator ({string.punctuation}).", str)
+                break
+            except ValueError as ve:
+                print(ve)
+        while True:
+            try:
+                capitalized = input_validation("Should the words in the password be capitalized? (yes/no): ", "Please type in 'yes' or 'no'.", str)
+                break
+            except ValueError as ve:
+                print(ve)
+        password = MemorablePasswordGenerator(pass_length, separator, capitalized)
 
-if pass_type in ["pin", "p"]:
-    while True:
-        try:
-            pass_length = test("How long should the password be? (3-8 characters): ", "Please type in a number between 3 and 8.", int)
-            if not 3 <= pass_length <= 8:
-                raise ValueError("Password length must be between 3 and 8.")
-            break
-        except ValueError as ve:
-            print(ve)
-    password = PinNumberGenerator(pass_length)
+    if pass_type in ["pin", "p"]:
+        while True:
+            try:
+                pass_length = input_validation("How long should the password be? (3-8 characters): ", "Please type in a number between 3 and 8.", int)
+                if not 3 <= pass_length <= 8:
+                    raise ValueError("Password length must be between 3 and 8.")
+                break
+            except ValueError as ve:
+                print(ve)
+        password = PinNumberGenerator(pass_length)
+    return password
 
 if __name__ == "__main__":
-    password_generated = password.generate()
+    pass_obj = handle_flow()
+    password_generated = pass_obj.generate()
     print(f"Generated password: {password_generated}")
