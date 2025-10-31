@@ -131,6 +131,10 @@ class PinNumberGenerator(PasswordGenerator):
 
 
 def determine_pass_type():
+    """Determines the type of password the user wants to generate
+    :return: type of password
+    :rtype: str
+    """
     while True:
         try:
             pass_type = input("Please type in wich kind of password you need: 'Random', 'Memorable' or 'Pin'(r/m/p): ").lower()
@@ -141,6 +145,16 @@ def determine_pass_type():
             print(ve)
 
 def input_validation(inp_message, error_message, type):
+    """Validates user input based on expected type and criteria
+    :param inp_message: message to prompt the user for input
+    :type inp_message: str
+    :param error_message: message to display in case of invalid input
+    :type error_message: str
+    :param type: expected type of the input (int or str)
+    :type type: type
+    :raises ValueError: if the input does not meet the expected criteria
+    :return: validated user input
+    :rtype: int or str"""
     user_input = input(inp_message)
     if type == int and user_input.isdigit():
         user_input = int(user_input)
@@ -156,6 +170,10 @@ def input_validation(inp_message, error_message, type):
         raise ValueError(f"Invalid input. {error_message}")
 
 def handle_flow():
+    """Handles the flow of the program based on user input
+    :return: an instance of the chosen password generator class
+    :rtype: PasswordGenerator
+    """
     pass_type = determine_pass_type()
     if pass_type in ["random", "r"]:
         while True:
